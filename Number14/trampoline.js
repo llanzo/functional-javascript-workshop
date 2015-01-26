@@ -5,22 +5,57 @@ function repeat(operation, num) {
     // Modify this so it doesn't cause a stack overflow!
     if (num <= 0) return
     operation()
-    return repeat(operation, --num)
+    var retVal = repeat.bind(this, operation, --num);
+    return retVal;
 }
 
 function trampoline(fn) {
     // You probably want to implement a trampoline!
+    var retVal = fn;
+    while(retVal instanceof Function ) {
+        retVal = retVal();
+    }
+    return retVal;
+
 }
 
 module.exports = function(operation, num) {
     // You probably want to call your trampoline here!
-    return repeat(operation, num)
+    return trampoline(repeat(operation, num) );
 }
 
-/**After reading the instructions, it seems like the problem I'm supposed to solve is that
- when the recursive repeat is called with a repeat count of 1000000 it causes a stack overflow.
- so I think what I can do is intercept the call, divide the number up evenly in to smaller divisors
- and then call the recursive repeat with the smaller divisor, so it doesn't cause a stack overflow.
- once one of the smaller divisor portions finishes, it should notify Trampoline to launch it
- into it's next group of calls.
+/**The trampoline returns a value
+ * only if the result of evaluting it's argument is not a function
+ *
+ * What I can do is bind the the repeat function and the aruguments,
+ * and store this a variable, retVal,  and return that.  This when when I call
+ * return retVal, the function object (wtih specified parameters is returned)
+ * but the function is not evaluated
+ */
+
+/*
+OFFICTIAL SOLUTION
+
+ function repeat(operation, num) {
+ return function() {
+ if (num <= 0) return
+ operation()
+ return repeat(operation, --num)
+ }
+ }
+
+ function trampoline(fn) {
+ while(fn && typeof fn === 'function') {
+ fn = fn()
+ }
+ }
+
+ module.exports = function(operation, num) {
+ trampoline(function() {
+ return repeat(operation, num)
+ })
+ }
+
+
+
  */
